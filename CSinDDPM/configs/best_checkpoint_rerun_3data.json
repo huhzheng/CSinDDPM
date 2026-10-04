@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "description": "Full CSinDDPM (A): porosity + Conditional ResBlocks + dirty-data augmentation. Descriptive protocol; shell scripts and CLI arguments execute the settings, not this JSON file.",
+  "experiment_variant": "A_full",
+  "module_state": {
+    "porosity_as_model_input": true,
+    "conditional_resblock_branch": true,
+    "ordinary_timestep_resblocks": true,
+    "dirty_data": true
+  },
+  "training": {
+    "train_steps": 60000,
+    "batch_size": 1,
+    "microbatch": 1,
+    "lr": 0.0001,
+    "weight_decay": 0.0,
+    "schedule_sampler": "uniform",
+    "diffusion_steps": 1000,
+    "noise_schedule": "linear",
+    "image_size": 64,
+    "num_channels": 64,
+    "num_res_blocks": 1,
+    "channel_mult": "1,2,4",
+    "use_condition": true,
+    "condition_dim": 1,
+    "use_scale_shift_norm": false,
+    "learn_sigma": true,
+    "vb_weight": 1.0,
+    "dirty_probability": 0.30,
+    "dirty_min_frac": 0.10,
+    "dirty_max_frac": 0.30,
+    "ema_rate": 0.9999,
+    "use_fp16": false
+  },
+  "training_seeds": [2026],
+  "manuscript_replication_minimum": "3 independent training seeds x 10 sampling seeds; this staged rerun alone is exploratory",
+  "datasets": [
+    {
+      "name": "sandstone",
+      "training_tiff": "data/sandstone_64_uint8/min_0_0_0.tif",
+      "validation_tiff": null,
+      "provenance_status": "PENDING_AUTHOR_CONFIRMATION"
+    },
+    {
+      "name": "carbonate",
+      "training_tiff": "data/CarbonateRock/carbonate_min_448_256_384.tif",
+      "validation_tiff": null,
+      "provenance_status": "PENDING_AUTHOR_CONFIRMATION"
+    },
+    {
+      "name": "mt_gambier_limestone",
+      "training_tiff": "data/Mt Gambier limestone/mt_gambier_z256_y384_x128.tif",
+      "validation_tiff": null,
+      "provenance_status": "PENDING_AUTHOR_CONFIRMATION"
+    }
+  ],
+  "checkpoint_selection": {
+    "enabled": true,
+    "evaluation_schedule": "every saved checkpoint",
+    "save_interval": 5000,
+    "metric": "mean_total_loss",
+    "direction": "minimize",
+    "validation_trials": 16,
+    "validation_seed": 314159,
+    "validation_augmentation": "disabled",
+    "validation_source_when_null": "training volume, fixed-noise proxy only",
+    "rank_model_and_ema_separately": true,
+    "include_ema_in_overall_ranking": true,
+    "default_reconstruction_variant": "model",
+    "tie_break": "lower step, then ordinary model before EMA"
+  },
+  "sampling": {
+    "seed_start": 1001,
+    "seed_end": 1010,
+    "target_porosity": "porosity of each training TIFF; explicit scalar model input",
+    "samples_per_dataset": 10,
+    "diffusion_steps": 1000,
+    "sampler": "ancestral_ddpm",
+    "threshold": 0.0,
+    "save_raw": true
+  },
+  "output_roots": {
+    "training": "revision_outputs/full_model_baseline_3data",
+    "sampling": "revision_outputs/full_model_samples_seed1001_1010_3data",
+    "logs": "server_logs/full_model_baseline_3data"
+  }
+}
